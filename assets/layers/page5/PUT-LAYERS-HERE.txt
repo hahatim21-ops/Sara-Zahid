@@ -1,0 +1,2 @@
+Page 5 (regards) – transparent PNGs, same canvas size as the page:
+bg.png  chandelier-left.png  chandelier-right.png  palm-left.png  palm-right.png

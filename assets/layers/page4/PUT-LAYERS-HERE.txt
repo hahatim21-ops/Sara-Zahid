@@ -1,0 +1,3 @@
+Page 4 (Nikah + Reception) – transparent PNGs, same canvas size as the page:
+bg.png (pink bg + stairs + candles, no cards)  card-nikah.png  card-reception.png
+optional: banner.png (empty maroon "Scratch to Reveal" banner)

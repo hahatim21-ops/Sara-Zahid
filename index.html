@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" class="is-loading is-locked">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sara &amp; Zahid · Nikah &amp; Reception</title>
+    <meta name="description" content="You're invited — tap the key to open" />
+    <meta name="theme-color" content="#F7E4DC" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sara &amp; Zahid · Nikah &amp; Reception" />
+    <meta property="og:description" content="You're invited — tap the key to open" />
+    <meta property="og:image" content="og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sara &amp; Zahid · Nikah &amp; Reception" />
+    <meta name="twitter:description" content="You're invited — tap the key to open" />
+    <meta name="twitter:image" content="og.jpg" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  </head>
+  <body>
+    <div id="loader" aria-hidden="true"><span class="loader-diamond"></span></div>
+
+    <div class="side-bgs" aria-hidden="true"></div>
+    <main id="col" class="col" aria-label="Wedding invitation of Sara and Zahid"></main>
+
+    <div id="intro" class="intro" role="dialog" aria-label="Invitation envelope — tap the key to open"></div>
+
+    <canvas id="fx" aria-hidden="true"></canvas>
+
+    <button id="mute" class="mute" type="button" aria-label="Mute music" aria-pressed="false" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="mute-spk" d="M4 9.5h3.2L11.5 6v12l-4.3-3.5H4z" />
+        <g class="mute-on"><path d="M14.5 9.2a3.8 3.8 0 0 1 0 5.6" /><path d="M16.9 6.9a7 7 0 0 1 0 10.2" /></g>
+        <g class="mute-off"><path d="M15 9.5l5 5" /><path d="M20 9.5l-5 5" /></g>
+      </svg>
+    </button>
+
+    <audio id="music" src="audio/rab-rakha.mp3" preload="none" loop playsinline></audio>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

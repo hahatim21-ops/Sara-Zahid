@@ -1,0 +1,2 @@
+Page 2 (monogram) – transparent PNGs, same canvas size as the page:
+bg.png  monogram.svg (or monogram-S.png + monogram-Z.png)  chandelier-left.png  chandelier-right.png  palm-left.png  palm-right.png

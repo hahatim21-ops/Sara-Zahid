@@ -1,0 +1,3 @@
+Page 3 (invitation) – transparent PNGs, same canvas size as the page:
+bg.png  chandelier-left.png  chandelier-right.png  palm-left.png  palm-right.png
+optional: bismillah.svg/png  flourish.svg/png
