@@ -93,11 +93,29 @@ function measureBaselines() {
   probe.remove();
 }
 
-function hydrateLazy() {
-  for (const img of document.querySelectorAll('img[data-srcset]')) {
+/** Block scrolling while the intro covers the page (touch, wheel, keys) without changing page layout. */
+function blockScroll() {
+  const stop = (e) => e.preventDefault();
+  const keys = new Set(['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']);
+  const onKey = (e) => { if (keys.has(e.key) && !e.target.closest?.('.key-btn')) e.preventDefault(); };
+  window.addEventListener('wheel', stop, { passive: false });
+  window.addEventListener('touchmove', stop, { passive: false });
+  window.addEventListener('keydown', onKey);
+  return () => {
+    window.removeEventListener('wheel', stop);
+    window.removeEventListener('touchmove', stop);
+    window.removeEventListener('keydown', onKey);
+  };
+}
+const unblockScroll = blockScroll();
+
+function hydrateLazy(scope = document) {
+  for (const img of scope.querySelectorAll('img[data-srcset]')) {
     img.srcset = img.dataset.srcset;
     img.src = img.dataset.src;
     img.removeAttribute('data-srcset');
+    // decode in the background as soon as it arrives, so its first paint doesn't stall a frame
+    img.decode?.().catch(() => {});
   }
 }
 
@@ -163,6 +181,7 @@ if (debug) {
   await Promise.race([Promise.all([fontsReady, decodeAll(p1p2Images)]), timeout(9000)]);
   measureBaselines();
   scratch.paint();
+  ScrollTrigger.refresh(); // measured now, while nothing moves (not at the tap or the landing)
   window.addEventListener('resize', () => { if (!scratch.done) gsap.delayedCall(0.2, () => scratch.paint()); });
 
   root.classList.remove('is-loading');
@@ -184,7 +203,7 @@ if (debug) {
     hydrateLazy();
     p2tl.progress(1);
     introRoot.remove();
-    root.classList.remove('is-locked');
+    unblockScroll();
     lenis?.start();
     ScrollTrigger.refresh();
     return;
@@ -192,14 +211,17 @@ if (debug) {
 
   runIntro(I, {
     reduced, fx, page2: P2.canvas,
-    onOpenStart: () => hydrateLazy(),
+    // Heavy work is kept out of the keyhole flight:
+    //  - scroll triggers were measured before the tap, while nothing moved;
+    //  - at the tap: load page 3, whose top is already visible below page 2 when we land;
+    //  - after landing: release the scroll blocker (no relayout) and load pages 4–5.
+    onOpenStart: () => hydrateLazy(P3.section),
     onDoorsNearlyOpen: () => p2tl.play(),
     onDone: () => {
-      root.classList.remove('is-locked');
-      window.scrollTo(0, 0);
+      unblockScroll();
       lenis?.start();
-      ScrollTrigger.refresh();
       showMuteButton();
+      gsap.delayedCall(0.8, () => { hydrateLazy(P4.section); hydrateLazy(P5.section); });
     },
   });
 })();

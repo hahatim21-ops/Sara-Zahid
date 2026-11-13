@@ -21,6 +21,8 @@ export function buildIntro(root) {
     s('defs', {}, fillGrad), s('path', { d: page.keyholePath, fill: 'url(#holeFill)' }));
   const holeLight = h('div', { class: 'hole-light', style: { left: `${kh.x}%`, top: `${kh.y}%` } });
   const rays = h('div', { class: 'keyhole-rays', style: { left: `${kh.x}%`, top: `${kh.y}%` } });
+  // nearly-invisible (not 0) so the browser paints these layers up front, not on their first visible frame
+  for (const el of [holeLight, rays]) Object.assign(el.style, { opacity: '0.001', willChange: 'transform, opacity' });
   const behind = h('div', { class: 'canvas canvas--cover intro-behind' }, holeFill, holeLight, rays);
 
   // --- the page-1 stage with its keyhole window ---
@@ -81,21 +83,26 @@ export function runIntro(I, { reduced, fx, page2, onDoorsNearlyOpen, onOpenStart
     if (e?.type === 'keydown') e.preventDefault();
     opened = true;
     I.root.style.cursor = 'default';
-    startMusic();
-    onOpenStart?.();
+    startMusic(); // must run inside the tap (browser gesture rule)
     // the hint's breathing is a CSS animation (it would override inline opacity) — freeze it, then fade
     const hintOpacity = getComputedStyle(I.hint).opacity;
     I.hint.style.animation = 'none';
     gsap.fromTo(I.hint, { opacity: hintOpacity }, { opacity: 0, duration: 0.4, overwrite: true });
-    if (reduced) return crossfade();
-    sequence();
+    // Build the sequence on the next frame, paused, and start it one frame later: the one-off setup cost
+    // (audio, layout reads) then can't make the animation skip ahead.
+    requestAnimationFrame(() => {
+      const tl = reduced ? crossfade() : sequence();
+      tl.pause();
+      onOpenStart?.();
+      requestAnimationFrame(() => tl.play());
+    });
   };
   I.root.addEventListener('click', open);
   I.keyBtn.addEventListener('keydown', open);
 
   function crossfade() {
     float.kill();
-    gsap.timeline({ onComplete: finish })
+    return gsap.timeline({ onComplete: finish })
       .to(I.keyBtn, { opacity: 0, duration: 0.5 })
       .add(() => onDoorsNearlyOpen?.(), 0.4)
       .to(I.root, { opacity: 0, duration: 1 }, 0.3);
@@ -138,35 +145,49 @@ export function runIntro(I, { reduced, fx, page2, onDoorsNearlyOpen, onOpenStart
 
     // 4. the lock gives: light pours through the keyhole, the key dissolves into it
     tl.to(I.holeFill, { opacity: 0, duration: 0.6, ease: 'power1.inOut' }, 2.25);
-    tl.fromTo(I.holeLight, { opacity: 0, scale: 0.25 }, { opacity: 1, scale: 0.7, duration: 0.7, ease: 'power2.out' }, 2.25);
-    tl.fromTo(I.rays, { opacity: 0, rotation: 0, scale: 0.6 }, { opacity: 0.9, rotation: 20, scale: 1, duration: 1.3, ease: 'power1.out' }, 2.3);
+    tl.fromTo(I.holeLight, { opacity: 0.001, scale: 0.25 }, { opacity: 1, scale: 0.7, duration: 0.7, ease: 'power2.out' }, 2.25);
+    tl.fromTo(I.rays, { opacity: 0.001, rotation: 0, scale: 0.6 }, { opacity: 0.9, rotation: 20, scale: 1, duration: 1.3, ease: 'power1.out' }, 2.3);
     tl.to(I.keyBtn, { opacity: 0, duration: 0.35, ease: 'power1.out' }, 2.45);
 
     // 5. fly through the keyhole: the page-1 stage zooms around the keyhole, its window grows past the screen
-    // Moderate scale + a cross-fade (instead of a huge scale) keeps every frame cheap and the hand-off seamless.
-    const T = 2.95, D = 2.6;
-    tl.fromTo(I.stage, { scale: 1 }, { scale: 9, duration: D, ease: 'power2.in' }, T);
-    tl.to(I.stage, { opacity: 0, duration: D * 0.5, ease: 'sine.in' }, T + D * 0.5);
-    tl.to(I.holeLight, { scale: 4, opacity: 0, duration: D * 0.85, ease: 'sine.inOut' }, T + 0.2);
-    tl.to(I.rays, { opacity: 0, scale: 2.4, rotation: 55, duration: D * 0.7, ease: 'sine.in' }, T);
+    // Fly all the way through the keyhole (scale ×28). The zoom is driven in log-space — scale = 28^z —
+    // so the perceived speed builds evenly instead of saving all the motion for the last frames (no lurch,
+    // no halt). The plate dissolves during the final stretch so the arrival is seamless.
+    const T = 2.9, D = 2.3, MAX = 28;
+    const z = { v: 0 };
+    gsap.set([I.stage, page2].filter(Boolean), { willChange: 'transform', force3D: true });
+    tl.to(z, {
+      v: 1, duration: D, ease: 'power1.in',
+      onUpdate: () => gsap.set(I.stage, { scale: Math.pow(MAX, z.v) }),
+    }, T);
+    tl.to(I.stage, { opacity: 0.001, duration: D * 0.32, ease: 'sine.in' }, T + D * 0.68);
+    tl.to(I.holeLight, { scale: 7, duration: D, ease: 'power2.in' }, T + 0.1)
+      .to(I.holeLight, { opacity: 0.001, duration: D * 0.55, ease: 'sine.inOut' }, T + D * 0.6);
+    tl.to(I.rays, { opacity: 0.001, scale: 3, rotation: 60, duration: D * 0.75, ease: 'sine.in' }, T);
     tl.add(() => {
       const r = I.flash.getBoundingClientRect();
-      fx.burst(r.left + r.width / 2, r.top + r.height / 2, { petals: 24, glitter: 22, speed: 300, gold: true });
-    }, T + D * 0.5);
-    // 6. page 2 beyond the keyhole gently settles as we arrive (transform only — no filters mid-flight)
+      fx.burst(r.left + r.width / 2, r.top + r.height / 2, { petals: 24, glitter: 22, speed: 320, gold: true });
+    }, T + D * 0.55);
+    // 6. page 2 beyond the keyhole: one continuous settle that carries on past the landing (transform only)
     if (page2) {
-      tl.fromTo(page2, { scale: 1.12 }, { scale: 1, duration: D + 0.5, ease: 'sine.out', clearProps: 'transform' }, T);
+      // independent of the intro timeline, so the overlay is released (and scrolling unlocked) the moment we land
+      gsap.set(page2, { scale: 1.18 });
+      tl.add(() => gsap.to(page2, { scale: 1, duration: D + 0.9, ease: 'power2.out', clearProps: 'transform' }), T); // keep will-change: dropping it re-rasterises the plate (a hitch)
     }
-    // page 2's own sequence starts once the flight has landed, so the two never compete for frames
     tl.add(() => onDoorsNearlyOpen?.(), T + D + 0.05);
     if (window.__debug) window.__introTL = tl;
+    return tl;
   }
 
   function finish() {
     chandSway.forEach((t) => t.kill());
     float.kill();
-    I.root.remove();
+    // hide now (cheap), tear down later when the page is idle — removing the big layers mid-landing hitches
+    I.root.style.visibility = 'hidden';
+    I.root.style.pointerEvents = 'none';
     onDone?.();
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+    setTimeout(() => idle(() => I.root.remove(), { timeout: 4000 }), 2500);
   }
 
   return { open };
