@@ -300,3 +300,31 @@ img { -webkit-user-drag: none; user-select: none; }
 @media (prefers-reduced-motion: reduce) {
   .flame-core, .flame-halo, .glint, .chand-glow::after, .key-glint, .hint, .foil-sheen, .scroll-cue .dot { animation: none !important; }
 }
+
+/* ---------------- page 5 countdown ---------------- */
+.countdown { position: absolute; text-align: center; color: var(--cd-color, var(--maroon)); }
+.cd-title {
+  margin: 0 0 2.6cqw; font-family: 'EB Garamond', serif; font-weight: 500; text-transform: uppercase; white-space: nowrap;
+  font-size: 2.05cqw; letter-spacing: 0.26em; text-indent: 0.26em; opacity: 0.9;
+}
+.cd-cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.66cqw; }
+.cd-cell {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 16.4cqw; padding-top: 1.8cqw; min-width: 0;
+  /* arched top, like the hall's windows */
+  border-radius: 50% 50% 1.1cqw 1.1cqw / 34% 34% 1.1cqw 1.1cqw;
+  background: linear-gradient(180deg, rgba(255, 251, 247, 0.82), rgba(250, 231, 224, 0.62));
+  border: 1px solid rgba(201, 162, 107, 0.6);
+  box-shadow: inset 0 0 0 0.32cqw rgba(255, 255, 255, 0.55), 0 0.5cqw 1.6cqw rgba(140, 70, 70, 0.12);
+}
+.cd-num { position: relative; display: block; overflow: hidden; width: 100%; height: 1.08em; line-height: 1.08; font-family: 'EB Garamond', serif; font-weight: 500; font-size: 6.8cqw; }
+.cd-val { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
+.cd-label {
+  margin-top: 0.8cqw; font-family: 'EB Garamond', serif; font-weight: 500; text-transform: uppercase; white-space: nowrap;
+  font-size: 1.6cqw; letter-spacing: 0.12em; text-indent: 0.12em; color: #9a5a5f;
+}
+.cd-foot {
+  margin: 2.6cqw 0 0; font-family: 'EB Garamond', serif; font-weight: 500; text-transform: uppercase; white-space: nowrap;
+  font-size: 1.85cqw; letter-spacing: 0.3em; text-indent: 0.3em; opacity: 0.85;
+}
+.cd-done { margin: 1cqw 0 0; font-family: 'Great Vibes', cursive; font-size: 7cqw; }

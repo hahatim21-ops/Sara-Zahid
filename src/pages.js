@@ -2,6 +2,7 @@
 import {
   scene, h, s, pageShell, elementImg, lineEl, writeOnEl, shapesSvg, divider, lineFromCenter, lineById, BASE,
 } from './scene.js';
+import { buildCountdown } from './countdown.js';
 
 const pctW = (page, v) => `${((v / page.w) * 100).toFixed(4)}%`;
 const pctH = (page, v) => `${((v / page.h) * 100).toFixed(4)}%`;
@@ -161,8 +162,11 @@ export function buildPage5() {
   const lines = [lineFromCenter(svg, a[2], y, a[0], color, 2.6), lineFromCenter(svg, b[0], y, b[2], color, 2.6)];
   const family = writeOnEl(page, lineById(page, 'family'));
   const credit = lineEl(page, lineById(page, 'credit'));
-  fg.append(svg, regards, family, credit);
-  return { ...P, regards, lines, family, credit };
+  // countdown: small diamond divider, then title + four arched tiles inside the open cream wall
+  const cdDiv = divider(svg, [612, 1548, 838, 1572], color, { sw: 2.2, gap: 0.05 });
+  const cd = buildCountdown(page, [408, 1612, 1040, 1960], color);
+  fg.append(svg, regards, family, cd.el, credit);
+  return { ...P, regards, lines, family, credit, cd, cdDiv };
 }
 
 export { scene };

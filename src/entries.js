@@ -321,8 +321,13 @@ export function initPage5(P, { reduced, fx }) {
   prepWriteOn(P.family);
   gsap.set(P.family, { opacity: 0 });
   gsap.set(P.glows.map((c) => c.querySelector('.chand-glow')), { opacity: 0 });
+  gsap.set([P.cd.title, P.cd.foot, ...P.cd.cells, P.cdDiv.diamond], { opacity: 0 });
+  gsap.set([P.cdDiv.left, P.cdDiv.right], { drawSVG: '0%' });
   if (reduced) {
     gsap.set(P.lines, { drawSVG: '100%' });
+    gsap.set([P.cd.title, P.cd.foot, ...P.cd.cells, P.cdDiv.diamond], { opacity: 1 });
+    gsap.set([P.cdDiv.left, P.cdDiv.right], { drawSVG: '100%' });
+    P.cd.showNow();
     gsap.set(P.family.querySelector('.w-fill'), { opacity: 1 });
     gsap.set(P.family.querySelector('.w-stroke'), { opacity: 0 });
     onEnter(P.regards, gsap.timeline().to([P.regards, P.family, P.credit, ...P.glows.map((c) => c.querySelector('.chand-glow'))], { opacity: 1, duration: 1 }));
@@ -335,5 +340,11 @@ export function initPage5(P, { reduced, fx }) {
     .add(drawLines(P.lines, 0.9), 0.25)
     .add(writeOn(P.family, 2.0), 0.9)
     .add(() => fx.shower(3), 1.2)
-    .fromTo(P.credit, { opacity: 0 }, { opacity: 1, duration: 1.2 }, 3));
+    // countdown: divider draws out, title fades up, tiles rise one by one, numbers count up to the live time
+    .add(drawDivider(P.cdDiv, 0.8), 2.5)
+    .fromTo(P.cd.title, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 2.75)
+    .fromTo(P.cd.cells, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.12 }, 2.95)
+    .add(() => P.cd.countIn(1.4), 3.05)
+    .fromTo(P.cd.foot, { opacity: 0 }, { opacity: 0.85, duration: 0.8 }, 3.5)
+    .fromTo(P.credit, { opacity: 0 }, { opacity: 1, duration: 1.2 }, 3.6));
 }

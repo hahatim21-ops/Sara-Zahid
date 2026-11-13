@@ -137,6 +137,7 @@ for (const [n, cfg] of Object.entries(PAGES)) {
   for (const e of cfg.erase) {
     const m = e.all ? rectMask(W, H, e.rect) : dilate(inkMask(ref, e.rect, { grow: 0 }), W, H, 2);
     page.shapes[e.id] = e.all ? e.rect : maskBBox(inkMask(ref, e.rect, { grow: 0 }), W, H) || e.rect;
+    if (e.dy) page.shapes[e.id] = page.shapes[e.id].map((v, i) => (i % 2 ? v + e.dy : v));
     masks.push(m);
   }
   const all = orMasks(W, H, masks);
@@ -280,7 +281,7 @@ for (const [n, cfg] of Object.entries(PAGES)) {
     const t = layout(l.font, segs, fsz, l.ls || 0);
     const cx = (ink[0] + ink[2]) / 2, cy = l.band ? (l.band[0] + l.band[1]) / 2 : (ink[1] + ink[3]) / 2;
     const ox = cx - (t.bb.x1 + t.bb.x2) / 2;
-    const by = cy - (t.bb.y1 + t.bb.y2) / 2;
+    const by = cy - (t.bb.y1 + t.bb.y2) / 2 + (l.dy || 0); // dy: deliberate move from the reference position
     const line = {
       id: l.id, font: l.font, segs, fs: +fsz.toFixed(2), x: +ox.toFixed(2), y: +by.toFixed(2), ls: l.ls || 0,
       ink: ink, credit: !!l.credit, adv: +t.advance.toFixed(2), color: inkColor(ref, ink),

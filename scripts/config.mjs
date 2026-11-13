@@ -141,12 +141,12 @@ export const PAGES = {
     src: 'page5-regards.jpg',
     elements: {},
     erase: [
-      { id: 'regL', rect: [414, 1276, 600, 1300] },
-      { id: 'regR', rect: [868, 1276, 1046, 1300] },
+      { id: 'regL', rect: [414, 1276, 600, 1300], dy: -70 },
+      { id: 'regR', rect: [868, 1276, 1046, 1300], dy: -70 },
     ],
     lines: [
-      { id: 'regards', rect: [614, 1238, 862, 1334], text: 'Regards', font: 'serif500' },
-      { id: 'family', rect: [360, 1338, 1110, 1532], text: 'Vataoo Family', font: 'script', write: true },
+      { id: 'regards', rect: [614, 1238, 862, 1334], text: 'Regards', font: 'serif500', dy: -70 },
+      { id: 'family', rect: [360, 1338, 1110, 1532], text: 'Vataoo Family', font: 'script', write: true, dy: -70 },
       { id: 'credit', rect: [495, 2245, 900, 2295], text: '@BESPOKEDESIGNS._', font: 'serif600', ls: 0.02, credit: true },
     ],
     chandeliers: [
