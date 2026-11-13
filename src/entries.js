@@ -129,11 +129,17 @@ export function onEnter(trigger, tl, { start = 'top 65%' } = {}) {
 export function swingLoops(glows, layers = {}, { random = true } = {}) {
   const loops = [];
   const ph = (p) => (random ? -Math.random() * p : 0);
+  // each chandelier swings together with its glow (same pivot, same tween)
+  const sides = ['left', 'right'];
+  const used = new Set();
   glows.forEach((g, i) => {
     const period = i % 2 ? 6.3 : 5.5;
-    loops.push(gsap.fromTo(g, { rotation: -2 }, { rotation: 2, duration: period / 2, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: ph(period) }));
+    const layer = layers[`chandelier-${sides[i % 2]}`];
+    if (layer) used.add(layer);
+    loops.push(gsap.fromTo(layer ? [g, layer] : g, { rotation: -2 }, { rotation: 2, duration: period / 2, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: ph(period) }));
   });
   for (const [name, el] of Object.entries(layers)) {
+    if (used.has(el)) continue;
     if (name.startsWith('chandelier')) {
       const period = name.endsWith('right') ? 6.3 : 5.5;
       loops.push(gsap.fromTo(el, { rotation: -2 }, { rotation: 2, duration: period / 2, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: ph(period) }));

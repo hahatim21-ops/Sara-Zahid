@@ -7,7 +7,7 @@ import { startMusic, playClick } from './audio.js';
 import { swingLoops } from './entries.js';
 
 const REST = { x: 50, y: 73 }; // key centre at rest (% of canvas)
-const KEY_W = 46; // key width in cqw
+const KEY_W = 36; // key width in cqw
 
 export function buildIntro(root) {
   const page = scene.pages[1];
@@ -92,7 +92,6 @@ export function runIntro(I, { reduced, fx, page2, onDoorsNearlyOpen, onOpenStart
   };
   I.root.addEventListener('click', open);
   I.keyBtn.addEventListener('keydown', open);
-  gsap.delayedCall(1.1, () => I.keyBtn.focus({ preventScroll: true }));
 
   function crossfade() {
     float.kill();
@@ -140,24 +139,26 @@ export function runIntro(I, { reduced, fx, page2, onDoorsNearlyOpen, onOpenStart
     // 4. the lock gives: light pours through the keyhole, the key dissolves into it
     tl.to(I.holeFill, { opacity: 0, duration: 0.6, ease: 'power1.inOut' }, 2.25);
     tl.fromTo(I.holeLight, { opacity: 0, scale: 0.25 }, { opacity: 1, scale: 0.7, duration: 0.7, ease: 'power2.out' }, 2.25);
-    tl.fromTo(I.rays, { opacity: 0, rotation: 0, scale: 0.6 }, { opacity: 0.9, rotation: 25, scale: 1, duration: 1.2, ease: 'power1.out' }, 2.3);
+    tl.fromTo(I.rays, { opacity: 0, rotation: 0, scale: 0.6 }, { opacity: 0.9, rotation: 20, scale: 1, duration: 1.3, ease: 'power1.out' }, 2.3);
     tl.to(I.keyBtn, { opacity: 0, duration: 0.35, ease: 'power1.out' }, 2.45);
 
     // 5. fly through the keyhole: the page-1 stage zooms around the keyhole, its window grows past the screen
-    const T = 2.75, D = 1.7;
-    tl.fromTo(I.stage, { scale: 1 }, { scale: 28, duration: D, ease: 'expo.in' }, T);
-    tl.to(I.holeLight, { scale: 6, opacity: 0, duration: D, ease: 'power2.in' }, T + 0.15);
-    tl.to(I.rays, { opacity: 0, scale: 3, rotation: 60, duration: D * 0.8, ease: 'power1.in' }, T);
+    // Moderate scale + a cross-fade (instead of a huge scale) keeps every frame cheap and the hand-off seamless.
+    const T = 2.95, D = 2.6;
+    tl.fromTo(I.stage, { scale: 1 }, { scale: 9, duration: D, ease: 'power2.in' }, T);
+    tl.to(I.stage, { opacity: 0, duration: D * 0.5, ease: 'sine.in' }, T + D * 0.5);
+    tl.to(I.holeLight, { scale: 4, opacity: 0, duration: D * 0.85, ease: 'sine.inOut' }, T + 0.2);
+    tl.to(I.rays, { opacity: 0, scale: 2.4, rotation: 55, duration: D * 0.7, ease: 'sine.in' }, T);
     tl.add(() => {
       const r = I.flash.getBoundingClientRect();
-      fx.burst(r.left + r.width / 2, r.top + r.height / 2, { petals: 24, glitter: 22, speed: 320, gold: true });
-    }, T + D * 0.55);
-    // 6. page 2 beyond the keyhole: bright and soft, settling as we arrive
+      fx.burst(r.left + r.width / 2, r.top + r.height / 2, { petals: 24, glitter: 22, speed: 300, gold: true });
+    }, T + D * 0.5);
+    // 6. page 2 beyond the keyhole gently settles as we arrive (transform only — no filters mid-flight)
     if (page2) {
-      tl.fromTo(page2, { scale: 1.18, filter: 'blur(5px) brightness(1.25)' },
-        { scale: 1, filter: 'blur(0px) brightness(1)', duration: D + 0.6, ease: 'power2.out', clearProps: 'filter,transform' }, T - 0.1);
+      tl.fromTo(page2, { scale: 1.12 }, { scale: 1, duration: D + 0.5, ease: 'sine.out', clearProps: 'transform' }, T);
     }
-    tl.add(() => onDoorsNearlyOpen?.(), T + D - 0.3);
+    // page 2's own sequence starts once the flight has landed, so the two never compete for frames
+    tl.add(() => onDoorsNearlyOpen?.(), T + D + 0.05);
     if (window.__debug) window.__introTL = tl;
   }
 

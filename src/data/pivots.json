@@ -1,7 +1,91 @@
 {
-  "page1": {},
-  "page2": {},
-  "page3": {},
+  "page1": {
+    "chandelier-left": {
+      "x": 9.32,
+      "y": 28.92,
+      "sprite": true
+    },
+    "chandelier-right": {
+      "x": 89.72,
+      "y": 28.92,
+      "sprite": true
+    },
+    "palm-left": {
+      "x": 0,
+      "y": 50.47,
+      "sprite": true
+    },
+    "palm-right": {
+      "x": 100,
+      "y": 50.47,
+      "sprite": true
+    }
+  },
+  "page2": {
+    "chandelier-left": {
+      "x": 16.47,
+      "y": 48.56,
+      "sprite": true
+    },
+    "chandelier-right": {
+      "x": 83.53,
+      "y": 48.56,
+      "sprite": true
+    },
+    "palm-left": {
+      "x": 7.12,
+      "y": 42.76,
+      "sprite": true
+    },
+    "palm-right": {
+      "x": 92.88,
+      "y": 42.76,
+      "sprite": true
+    }
+  },
+  "page3": {
+    "chandelier-left": {
+      "x": 16.01,
+      "y": 42.9,
+      "sprite": true
+    },
+    "chandelier-right": {
+      "x": 83.99,
+      "y": 42.9,
+      "sprite": true
+    },
+    "palm-left": {
+      "x": 8.63,
+      "y": 43.36,
+      "sprite": true
+    },
+    "palm-right": {
+      "x": 91.37,
+      "y": 43.36,
+      "sprite": true
+    }
+  },
   "page4": {},
-  "page5": {}
+  "page5": {
+    "chandelier-left": {
+      "x": 11.39,
+      "y": 29.11,
+      "sprite": true
+    },
+    "chandelier-right": {
+      "x": 89.03,
+      "y": 29.31,
+      "sprite": true
+    },
+    "palm-left": {
+      "x": 0,
+      "y": 43.48,
+      "sprite": true
+    },
+    "palm-right": {
+      "x": 100,
+      "y": 43.48,
+      "sprite": true
+    }
+  }
 }

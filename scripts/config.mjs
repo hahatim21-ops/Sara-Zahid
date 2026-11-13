@@ -15,9 +15,16 @@ export const PAGES = {
     elements: { keyhole: { rect: [568, 1052, 882, 1462], mode: 'object', thr: 20 } },
     erase: [],
     lines: [],
+    // glow anchors: top = the sprite pivot (cap of the lantern), so glow and crystal swing as one
     chandeliers: [
-      { x: 135, y: 960, w: 200, h: 300, top: 0 },
-      { x: 1310, y: 960, w: 200, h: 300, top: 0 },
+      { x: 135, y: 960, w: 200, h: 300, top: 745 },
+      { x: 1300, y: 960, w: 200, h: 300, top: 745 },
+    ],
+    sprites: [
+      { name: 'chandelier-left', rect: [25, 735, 248, 1122], pivot: [135, 745] },
+      { name: 'chandelier-right', rect: [1192, 735, 1408, 1122], pivot: [1300, 745] },
+      { name: 'palm-left', rect: [0, 1118, 272, 1412], pivot: [0, 1300] },
+      { name: 'palm-right', rect: [1178, 1118, 1449, 1412], pivot: [1449, 1300] },
     ],
   },
   2: {
@@ -32,8 +39,14 @@ export const PAGES = {
       { id: 'zahid', rect: [487, 944, 675, 1036], text: 'Zahid', font: 'script', write: true },
     ],
     chandeliers: [
-      { x: 155, y: 852, w: 120, h: 190, top: 560 },
-      { x: 788, y: 852, w: 120, h: 190, top: 560 },
+      { x: 155, y: 870, w: 120, h: 130, top: 812 },
+      { x: 786, y: 870, w: 120, h: 130, top: 812 },
+    ],
+    sprites: [
+      { name: 'chandelier-left', rect: [90, 802, 222, 948], pivot: [155, 812] },
+      { name: 'chandelier-right', rect: [720, 802, 852, 948], pivot: [786, 812] },
+      { name: 'palm-left', rect: [0, 538, 268, 792], pivot: [67, 715] },
+      { name: 'palm-right', rect: [673, 538, 941, 792], pivot: [874, 715] },
     ],
     candles: {
       manual: [
@@ -65,14 +78,20 @@ export const PAGES = {
       { id: 'd1', rect: [410, 1515, 1030, 1561], text: 'D/o Mr. Mohamed Ibrahim (Sohail) &', font: 'serif500', group: 'parents' },
       { id: 'd2', rect: [460, 1561, 990, 1605], text: 'Mrs. Samina Mohamed Ibrahim', font: 'serif500', group: 'parents' },
       { id: 'with', rect: [670, 1632, 772, 1678], text: 'With', font: 'serif400' },
-      { id: 'zahid', rect: [520, 1690, 940, 1830], text: 'Zahid', font: 'script', write: true },
+      { id: 'zahid', rect: [520, 1690, 940, 1830], text: 'Zahid', font: 'script', write: true, band: [1678, 1834] },
       { id: 's1', rect: [425, 1835, 1025, 1888], text: 'S/o Mr. Ashfaque Ishaque Moulvi &', font: 'serif500', group: 'parents' },
       { id: 's2', rect: [460, 1888, 990, 1939], text: 'Mrs. Farzana Ashfaque Moulvi', font: 'serif500', group: 'parents' },
       { id: 'credit', rect: [283, 2411, 667, 2459], text: '@BESPOKEDESIGNS._', font: 'serif600', ls: 0.02, credit: true },
     ],
     chandeliers: [
-      { x: 232, y: 1252, w: 160, h: 290, top: 1080 },
-      { x: 1216, y: 1256, w: 160, h: 290, top: 1080 },
+      { x: 232, y: 1252, w: 160, h: 290, top: 1105 },
+      { x: 1217, y: 1256, w: 160, h: 290, top: 1105 },
+    ],
+    sprites: [
+      { name: 'chandelier-left', rect: [140, 1100, 326, 1416], pivot: [232, 1105] },
+      { name: 'chandelier-right', rect: [1124, 1100, 1310, 1416], pivot: [1217, 1105] },
+      { name: 'palm-left', rect: [0, 858, 420, 1104], pivot: [125, 1117] },
+      { name: 'palm-right', rect: [1029, 858, 1449, 1104], pivot: [1324, 1117] },
     ],
     candles: { detect: { yMinFrac: 0.76, minR: 240, minG: 200, maxB: 192, minGB: 40, maxRG: 60, minWhite: 3, white: [250, 243, 225], exclude: [[0, 0.76, 0.2, 0.85], [0.8, 0.76, 1, 0.85]] } },
   },
@@ -131,8 +150,14 @@ export const PAGES = {
       { id: 'credit', rect: [495, 2245, 900, 2295], text: '@BESPOKEDESIGNS._', font: 'serif600', ls: 0.02, credit: true },
     ],
     chandeliers: [
-      { x: 165, y: 938, w: 190, h: 300, top: 0 },
-      { x: 1290, y: 942, w: 190, h: 300, top: 0 },
+      { x: 165, y: 938, w: 190, h: 300, top: 750 },
+      { x: 1290, y: 942, w: 190, h: 300, top: 755 },
+    ],
+    sprites: [
+      { name: 'chandelier-left', rect: [55, 740, 276, 1092], pivot: [165, 750] },
+      { name: 'chandelier-right', rect: [1178, 745, 1400, 1096], pivot: [1290, 755] },
+      { name: 'palm-left', rect: [0, 1096, 292, 1292], pivot: [0, 1120] },
+      { name: 'palm-right', rect: [1158, 1098, 1449, 1294], pivot: [1449, 1120] },
     ],
   },
 };

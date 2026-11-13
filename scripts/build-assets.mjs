@@ -147,7 +147,40 @@ for (const [n, cfg] of Object.entries(PAGES)) {
     bgSharp = sharp(layers.bg);
     log(`page ${n}: using bg layer`);
   } else {
-    const clean = masks.length ? fillMasked(ref, all, { seed: +n * 13 }) : ref;
+    const clean = masks.length ? fillMasked(ref, all, { seed: +n * 13 }) : { ...ref, data: new Uint8Array(ref.data) };
+    // --- moving sprites (chandeliers, palm fronds) cut from the clean image ---
+    // Each sprite is a feathered rectangle; underneath it the background is softly blurred, so when the
+    // sprite sways the edges reveal soft colour rather than a doubled copy of the object.
+    page.sprites = [];
+    if (cfg.sprites?.length) {
+      const blurred = await toSharp(clean).blur(9).raw().toBuffer();
+      for (const sp of cfg.sprites) {
+        if (layers[sp.name]) continue; // a real exported layer wins
+        const [x0, y0, x1, y1] = sp.rect;
+        const w = x1 - x0, hgt = y1 - y0;
+        const f = Math.round(Math.min(w, hgt) * (sp.feather ?? 0.16));
+        const edgeFree = { l: x0 <= 0, r: x1 >= W, t: y0 <= 0, b: y1 >= H };
+        const buf = Buffer.alloc(w * hgt * 4);
+        const ramp = (d) => { const t = Math.min(1, Math.max(0, d / f)); return t * t * (3 - 2 * t); };
+        for (let y = 0; y < hgt; y++)
+          for (let x = 0; x < w; x++) {
+            const a = (edgeFree.l ? 1 : ramp(x)) * (edgeFree.r ? 1 : ramp(w - 1 - x)) * (edgeFree.t ? 1 : ramp(y)) * (edgeFree.b ? 1 : ramp(hgt - 1 - y));
+            const gi = ((y0 + y) * W + (x0 + x)) * 3, o = (y * w + x) * 4;
+            buf[o] = clean.data[gi]; buf[o + 1] = clean.data[gi + 1]; buf[o + 2] = clean.data[gi + 2]; buf[o + 3] = Math.round(a * 255);
+            const k = Math.min(1, Math.max(0, (a - 0.5) * 2)); // blur only where the sprite is (nearly) opaque
+            if (k > 0) for (let c = 0; c < 3; c++) clean.data[gi + c] = Math.round(clean.data[gi + c] * (1 - k) + blurred[gi + c] * k);
+          }
+        const file = `p${n}-${sp.name}.webp`;
+        await sharp(buf, { raw: { width: w, height: hgt, channels: 4 } }).webp({ quality: 86, alphaQuality: 90 }).toFile(path.join(OUT_IMG, file));
+        page.sprites.push({
+          name: sp.name, src: `img/${file}`,
+          x: +((x0 / W) * 100).toFixed(3), y: +((y0 / H) * 100).toFixed(3), w: +((w / W) * 100).toFixed(3), h: +((hgt / H) * 100).toFixed(3),
+          ox: +(((sp.pivot[0] - x0) / w) * 100).toFixed(2), oy: +(((sp.pivot[1] - y0) / hgt) * 100).toFixed(2),
+        });
+        pivots[`page${n}`] ||= {};
+        pivots[`page${n}`][sp.name] = { x: +((sp.pivot[0] / W) * 100).toFixed(2), y: +((sp.pivot[1] / H) * 100).toFixed(2), sprite: true };
+      }
+    }
     bgSharp = toSharp(clean);
     await bgSharp.clone().jpeg({ quality: 88 }).toFile(path.join(DEBUG_DIR, `page${n}-clean.jpg`));
     fallbacks.push(`page ${n}: no layers → cleaned reference used as background${masks.length ? ' (text/ornaments lifted off and redrawn live)' : ''}`);
@@ -232,7 +265,11 @@ for (const [n, cfg] of Object.entries(PAGES)) {
     const segs = l.segs || [[l.text]];
     const ink = lineInk[l.id];
     const t = layout(l.font, segs, 100, l.ls || 0);
-    const fsz = ((ink[2] - ink[0]) / (t.bb.x2 - t.bb.x1)) * 100;
+    let fsz = ((ink[2] - ink[0]) / (t.bb.x2 - t.bb.x1)) * 100;
+    // script names: the web font's swashes are taller than the original lettering, so also respect the
+    // reference height (otherwise descenders run into the line below)
+    const bandH = l.band ? l.band[1] - l.band[0] : ink[3] - ink[1];
+    if (l.write) fsz = Math.min(fsz, (bandH / (t.bb.y2 - t.bb.y1)) * 100);
     return { l, segs, ink, fsz };
   });
   const groups = {};
@@ -241,7 +278,7 @@ for (const [n, cfg] of Object.entries(PAGES)) {
     const { l, segs, ink } = f;
     const fsz = l.group ? median(groups[l.group]) : f.fsz;
     const t = layout(l.font, segs, fsz, l.ls || 0);
-    const cx = (ink[0] + ink[2]) / 2, cy = (ink[1] + ink[3]) / 2;
+    const cx = (ink[0] + ink[2]) / 2, cy = l.band ? (l.band[0] + l.band[1]) / 2 : (ink[1] + ink[3]) / 2;
     const ox = cx - (t.bb.x1 + t.bb.x2) / 2;
     const by = cy - (t.bb.y1 + t.bb.y2) / 2;
     const line = {
@@ -266,7 +303,7 @@ for (const [n, cfg] of Object.entries(PAGES)) {
   page.chandeliers = (cfg.chandeliers || []).map((c) => ({ x: +((c.x / W) * 100).toFixed(2), y: +((c.y / H) * 100).toFixed(2), w: +((c.w / W) * 100).toFixed(2), h: +((c.h / H) * 100).toFixed(2), top: +((c.top / H) * 100).toFixed(2) }));
 
   // --- real layers (only when exported) ---
-  pivots[`page${n}`] = {};
+  pivots[`page${n}`] ||= {};
   for (const [name, file] of Object.entries(layers)) {
     if (name === 'bg' || !file.endsWith('.png')) continue;
     const bb = await alphaBBox(file);

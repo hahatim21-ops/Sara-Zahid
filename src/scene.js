@@ -185,6 +185,17 @@ function layerEls(n, page, lazy) {
     if (pv) img.style.transformOrigin = `${pv.x}% ${pv.y}%`;
     out[name] = img;
   }
+  // fallback sprites cut from the artwork (chandeliers, palm fronds) — positioned boxes with their own pivot
+  for (const sp of page.sprites || []) {
+    if (out[sp.name]) continue;
+    const src = `${BASE}${sp.src}`;
+    const img = h('img', {
+      class: `layer layer-${sp.name} sprite`, alt: '', draggable: 'false', decoding: 'async',
+      ...(lazy ? { 'data-src': src, 'data-srcset': `${src} 1x` } : { src }),
+      style: { position: 'absolute', left: `${sp.x}%`, top: `${sp.y}%`, width: `${sp.w}%`, height: `${sp.h}%`, transformOrigin: `${sp.ox}% ${sp.oy}%` },
+    });
+    out[sp.name] = img;
+  }
   return out;
 }
 
